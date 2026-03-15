@@ -1,5 +1,7 @@
 package com.example.drivertracker;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,20 +12,29 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText etUsername, etPassword, etConfirmPassword, etDriverName, etPhone;
-    private Button btnRegister;
+    private EditText editTextUsername, editTextPassword, editTextConfirmPassword,
+            editTextDriverName, editTextPhone;
+    private Button buttonRegister;
     private DatabaseHelper databaseHelper;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        context = this;
         databaseHelper = new DatabaseHelper(this);
 
-        initViews();
+        // Initialize views
+        editTextUsername = findViewById(R.id.editTextUsername);
+        editTextPassword = findViewById(R.id.editTextPassword);
+        editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
+        editTextDriverName = findViewById(R.id.editTextDriverName);
+        editTextPhone = findViewById(R.id.editTextPhone);
+        buttonRegister = findViewById(R.id.buttonRegister);
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
+        buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 registerUser();
@@ -31,38 +42,36 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void initViews() {
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        etDriverName = findViewById(R.id.etDriverName);
-        etPhone = findViewById(R.id.etPhone);
-        btnRegister = findViewById(R.id.btnRegister);
-    }
-
     private void registerUser() {
-        String username = etUsername.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
-        String confirmPassword = etConfirmPassword.getText().toString().trim();
-        String driverName = etDriverName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
+        String username = editTextUsername.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+        String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+        String driverName = editTextDriverName.getText().toString().trim();
+        String phone = editTextPhone.getText().toString().trim();
 
+        // Check if any field is empty
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()
                 || driverName.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Check if passwords match
         if (!password.equals(confirmPassword)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Register user
         if (databaseHelper.registerUser(username, password, driverName, phone)) {
-            Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show();
+
+            // Navigate to LoginActivity
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
             finish();
         } else {
-            Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT).show();
         }
     }
 }
