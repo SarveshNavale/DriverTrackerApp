@@ -3,9 +3,11 @@ package com.example.drivertracker;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.core.app.ActivityCompat;
@@ -25,8 +27,12 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     ToggleButton toggleButton;
+    TextView tvDriverInfo;
     FusedLocationProviderClient locationClient;
     LocationCallback locationCallback;
+
+    String username;
+    String driverName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +40,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get data from login
+        username = getIntent().getStringExtra("USERNAME");
+        driverName = getIntent().getStringExtra("DRIVER_NAME");
+
         toggleButton = findViewById(R.id.toggleLocation);
+        tvDriverInfo = findViewById(R.id.tvDriverInfo);
+
+        tvDriverInfo.setText("Driver: " + driverName + " (" + username + ")");
 
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -113,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
 
                 json.put("latitude",lat);
                 json.put("longitude",lon);
+                json.put("driver", driverName);
+                json.put("username", username);
 
                 OutputStream os = conn.getOutputStream();
                 os.write(json.toString().getBytes());
