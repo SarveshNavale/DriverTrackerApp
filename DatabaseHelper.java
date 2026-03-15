@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "DriverTracker.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // Incremented version
 
     // Table name
     private static final String TABLE_USERS = "users";
@@ -37,19 +37,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
 
-        // Insert a default driver for testing
+        // Insert a default user for testing
         ContentValues values = new ContentValues();
-        values.put(COLUMN_USERNAME, "driver1");
-        values.put(COLUMN_PASSWORD, "pass123");
-        values.put(COLUMN_DRIVER_NAME, "John Driver");
+        values.put(COLUMN_USERNAME, "driver");
+        values.put(COLUMN_PASSWORD, "1234");
+        values.put(COLUMN_DRIVER_NAME, "Default Driver");
         values.put(COLUMN_PHONE, "1234567890");
-        db.insert(TABLE_USERS, null, values);
-
-        values = new ContentValues();
-        values.put(COLUMN_USERNAME, "driver2");
-        values.put(COLUMN_PASSWORD, "pass123");
-        values.put(COLUMN_DRIVER_NAME, "Jane Driver");
-        values.put(COLUMN_PHONE, "0987654321");
         db.insert(TABLE_USERS, null, values);
     }
 
@@ -59,20 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Method to check if user exists
-    public boolean checkUser(String username, String password) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_USERS + " WHERE "
-                + COLUMN_USERNAME + " = ? AND " + COLUMN_PASSWORD + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{username, password});
-
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
-    }
-
-    // Method to register new user
+    // Register new user with all details
     public boolean registerUser(String username, String password, String driverName, String phone) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -86,19 +66,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    // Method to get driver name
-    public String getDriverName(String username) {
+    // Check login credentials
+    public boolean checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COLUMN_DRIVER_NAME + " FROM " + TABLE_USERS
-                + " WHERE " + COLUMN_USERNAME + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{username});
+        String query = "SELECT * FROM " + TABLE_USERS + " WHERE "
+                + COLUMN_USERNAME + " = ? AND " + COLUMN_PASSWORD + " = ?";
 
-        String driverName = "";
-        if (cursor.moveToFirst()) {
-            driverName = cursor.getString(0);
-        }
+        Cursor cursor = db.rawQuery(query, new String[]{username, password});
+        boolean exists = cursor.getCount() > 0;
         cursor.close();
         db.close();
-        return driverName;
+        return exists;
+    }
+
+    // Check if username exists
+    public boolean checkUsernameExists(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_USERNAME + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
     }
 }
