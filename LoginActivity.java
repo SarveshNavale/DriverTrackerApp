@@ -12,10 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etUsername, etPassword;
-    private Button btnLogin;
-    private TextView tvRegister;
+    private EditText editTextUsername, editTextPassword;
+    private Button buttonLogin, buttonRegister;
+    private TextView textViewSwitch;
     private DatabaseHelper databaseHelper;
+    private boolean isLoginMode = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,51 +25,58 @@ public class LoginActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
-        initViews();
+        editTextUsername = findViewById(R.id.editTextUsername);
+        editTextPassword = findViewById(R.id.editTextPassword);
+        buttonLogin = findViewById(R.id.buttonLogin);
+        buttonRegister = findViewById(R.id.buttonRegister);
+        textViewSwitch = findViewById(R.id.textViewSwitch);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        buttonRegister.setVisibility(View.GONE);
+
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginUser();
+                if (isLoginMode) {
+                    login();
+                }
             }
         });
 
-        tvRegister.setOnClickListener(new View.OnClickListener() {
+        buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Navigate to RegisterActivity instead of registering here
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        textViewSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to RegisterActivity
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
             }
         });
     }
 
-    private void initViews() {
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        tvRegister = findViewById(R.id.tvRegister);
-    }
-
-    private void loginUser() {
-        String username = etUsername.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+    private void login() {
+        String username = editTextUsername.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Please enter username and password", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (databaseHelper.checkUser(username, password)) {
-            Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-
-            // Start MainActivity
+            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("USERNAME", username);
-            intent.putExtra("DRIVER_NAME", databaseHelper.getDriverName(username));
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
         }
     }
 }
